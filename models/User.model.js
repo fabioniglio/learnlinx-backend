@@ -1,0 +1,46 @@
+const { Schema, model , mongoose} = require('mongoose')
+
+// TODO: Please make sure you edit the Book model to whatever makes sense in this case
+const userSchema = new Schema(
+  {
+    email: {
+      type: String,
+      unique: true,
+      required: true
+    },
+    password: {
+      type: String,
+      required: true
+    },
+    firstName: {
+      type: String,
+      required: true
+    },
+    lastName: {
+      type: String,
+      required: true
+    },
+    profilePictureUrl: {
+      type: String
+    },
+    phoneNumber: {
+      type: String,
+      unique: true,
+      required: true
+    },
+    courseId: {
+      type: [String]
+    },
+    isTeacher: {
+      type: Boolean,
+      default: false
+    },    
+    isAdmin: {
+      type: Boolean,
+      default: false
+    }
+})
+
+const User = model('User', userSchema)
+
+module.exports = User
