@@ -81,12 +81,12 @@ router.post("/signup", async (req, res) => {
   }
 
   const salt = bcrypt.genSaltSync(13);
-  const hashedPassword = bcrypt.hashSync(req.body.password, salt);
+  const passwordHash = bcrypt.hashSync(req.body.password, salt);
 
   try {
     const newUser = await User.create({
       email: req.body.email,
-      passwordHash: hashedPassword,
+      passwordHash: passwordHash,
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       profilePictureUrl: req.body.profilePictureUrl,
@@ -142,10 +142,9 @@ router.post("/login", async (req, res) => {
   }
 });
 
-
 //GET to verify
-router.get('/verify',isAuthenticated,(req,res)=>{
-    res.json({message: 'Hello', data: req.tokenPayload})
-})
+router.get("/verify", isAuthenticated, (req, res) => {
+  res.json({ message: "Hello", data: req.tokenPayload });
+});
 
 module.exports = router;
