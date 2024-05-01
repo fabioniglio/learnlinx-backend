@@ -125,11 +125,12 @@ router.post("/login", async (req, res) => {
           }
         );
 
-        res.status(200).json({ token: authToken });
+        // res.status(200).json({ token: authToken });
 
-        res
-          .status(200)
-          .json({ message: `Welcome back ${potentialUser.firstName}` });
+        res.status(200).json({
+          message: `Welcome back ${potentialUser.firstName}`,
+          token: authToken,
+        });
       } else {
         res.status(400).json({ message: "Incorrect password" });
       }
