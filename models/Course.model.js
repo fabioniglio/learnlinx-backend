@@ -24,6 +24,10 @@ const courseSchema = new mongoose.Schema({
   zoomLink: {
     type: String
   },
+  teacher:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User"
+  }
 });
 
 const Course = mongoose.model('Course', courseSchema);

@@ -18,21 +18,21 @@ const isAuthenticated = (req, res, next) => {
     // 1. There is no token
     // 2. Token is invalid
     // 3. There is no headers or authorization in req (no token)
-    res.status(401).json('token not provided or not valid')
+    res.status(401).json('Token not provided or not valid')
   }
-
-// const isAdmin = async (req, res, next) => {
-//   const { userId } = req.tokenPayload
-//   try {
-//     const user = await User.findById(userId)
-//     if (user.roles.includes('ADMIN')) {
-//       next()
-//     } else {
-//       res.status(403).json('You shall not pass')
-//     }
-//   } catch (error) {
-//     res.status(500).json(error)
-//   }
-// }
 }
-module.exports = { isAuthenticated /*, isAdmin*/ }
+const isTeacher = async (req, res, next) => {
+  const { userId } = req.tokenPayload
+  try {
+    const user = await User.findById(userId)
+    if (user.isTeacher) {
+      next()
+    } else {
+      res.status(403).json('You are not a teacher!')
+    }
+  } catch (error) {
+    res.status(500).json(error)
+  }
+}
+
+module.exports = { isAuthenticated , isTeacher  }
