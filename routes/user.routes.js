@@ -23,6 +23,27 @@ router.get("/", isAuthenticated, async (req, res) => {
   }
 });
 
+// Route to get all courses for a specific student
+router.get("/users/:userId/courses", isAuthenticated, async (req, res) => {
+  try {
+    const studentId = req.params.userId;
 
+    // Find the student to verify existence
+    const student = await User.findById(studentId);
+    if (!student) {
+      return res.status(404).send("Student not found");
+    }
 
-module.exports = router
+    // Find all courses that the student is enrolled in
+    const courses = await Course.find({ studentList: userId }).populate(
+      "studentList",
+      "firstName lastName"
+    );
+
+    res.json(courses);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+module.exports = router;
