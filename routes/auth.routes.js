@@ -2,7 +2,7 @@ const User = require("../models/User.model");
 const router = require("express").Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { isAuthenticated } = require("../middlewares/route-guard.middleware");
+const { isAuthenticated , isTeacher} = require("../middlewares/route-guard.middleware");
 
 router.get("/", (req, res) => {
   res.json("All good in auth");
@@ -145,7 +145,7 @@ router.post("/login", async (req, res) => {
 
 //GET to verify
 router.get("/verify", isAuthenticated, (req, res) => {
-  res.json({ message: "Hello", data: req.tokenPayload });
+  res.json({ message: "Hello", data: req.tokenPayload,});
 });
 
 module.exports = router;
