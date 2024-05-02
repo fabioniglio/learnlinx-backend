@@ -2,13 +2,16 @@ const User = require("../models/User.model");
 const router = require("express").Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { isAuthenticated , isTeacher} = require("../middlewares/route-guard.middleware");
+const {
+  isAuthenticated,
+  isTeacher,
+} = require("../middlewares/route-guard.middleware");
 
 router.get("/", (req, res) => {
   res.json("All good in auth");
 });
 
-//POST to signup
+// POST to signup
 router.post("/signup", async (req, res) => {
   const {
     email,
@@ -21,83 +24,63 @@ router.post("/signup", async (req, res) => {
     isTeacher,
   } = req.body;
   console.log(req.body);
-
-  if (
-    !email ||
-    !password ||
-    !firstName ||
-    !lastName ||
-    email === "" ||
-    password === "" ||
-    firstName === "" ||
-    lastName === ""
-  ) {
-    res.status(400).json({ message: "Provide email, password and name" });
-    return;
+  // Basic validation for empty fields
+  if (!email || !password || !firstName || !lastName) {
+    return res
+      .status(400)
+      .json({ message: "Provide email, password, and name" });
   }
-
-  // Use regex to validate the email format
+  console.log("data validated");
+  // Email format validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   if (!emailRegex.test(email)) {
-    res.status(400).json({ message: "Provide a valid email address." });
-    return;
+    return res.status(400).json({ message: "Provide a valid email address." });
   }
-
-  // Use regex to validate the password format
+  console.log("email validated");
+  // Password complexity validation
   const passwordRegex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/;
   if (!passwordRegex.test(password)) {
-    res.status(400).json({
+    return res.status(400).json({
       message:
-        "Password must have at least 6 characters and contain at least one number, one lowercase and one uppercase letter.",
+        "Password must have at least 6 characters and include at least one number, one lowercase and one uppercase letter.",
     });
-    return;
   }
-
-  // Check the users collection if a user with the same email already exists
-  //   User.findOne({ email })
-  //     .then((foundUser) => {
-  //       // If the user with the same email already exists, send an error response
-  //       if (foundUser) {
-  //         res.status(400).json({ message: "User already exists." });
-  //         return;
-  //       }
-  async function findUserByEmail(email, res) {
-    try {
-      const foundUser = await User.findOne({ email });
-
-      if (foundUser) {
-        res.status(400).json({ message: "User already exists." });
-        return;
-      }
-
-      // Continue with further processing if no user is found
-      // For example, creating a new user
-      // await User.create({ email, ...otherData });
-      // res.status(201).json({ message: "User created successfully." });
-    } catch (error) {
-      // Handle potential errors, such as database connection issues
-      res.status(500).json({ message: "Server error" });
-    }
-  }
-
-  const salt = bcrypt.genSaltSync(13);
-  const passwordHash = bcrypt.hashSync(req.body.password, salt);
-
+  console.log("pass validated");
+  // Check for duplicate email
   try {
+    const foundUser = await User.findOne({ email });
+    if (foundUser) {
+      return res.status(400).json({ message: "User already exists." });
+    }
+    console.log("user found");
+    // Hash password and create user if email is not found
+    const salt = bcrypt.genSaltSync(13);
+    const passwordHash = bcrypt.hashSync(password, salt);
+    console.log(email);
+    console.log(passwordHash);
+    console.log(firstName);
+    console.log(lastName);
+    console.log(profilePictureUrl);
+    console.log(phoneNumber);
+    console.log(courseId);
+    console.log(isTeacher);
     const newUser = await User.create({
-      email: req.body.email,
-      passwordHash: passwordHash,
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      profilePictureUrl: req.body.profilePictureUrl,
-      phoneNumber: req.body.phoneNumber,
-      courseId: req.body.courseId,
-      isTeacher: req.body.isTeacher,
+      email,
+      passwordHash,
+      firstName,
+      lastName,
+      profilePictureUrl,
+      phoneNumber,
+      courseId,
+      isTeacher,
     });
-    res.status(201).json(newUser);
+
+    res
+      .status(201)
+      .json({ message: "User created successfully.", userId: newUser._id });
   } catch (error) {
-    console.log(error);
-    res.status(500).json(error);
+    console.error("Signup error:", error);
+    res.status(500).json({ message: "Server error during signup" });
   }
 });
 
@@ -145,7 +128,7 @@ router.post("/login", async (req, res) => {
 
 //GET to verify
 router.get("/verify", isAuthenticated, (req, res) => {
-  res.json({ message: "Hello", data: req.tokenPayload,});
+  res.json({ message: "Hello", data: req.tokenPayload });
 });
 
 module.exports = router;
