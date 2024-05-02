@@ -28,9 +28,10 @@ const userSchema = new Schema(
       unique: true,
       required: true
     },
-    courseId: {
-      type: [String]
-    },
+    courseId: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+    }],
     isTeacher: {
       type: Boolean,
       default: false
