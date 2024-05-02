@@ -12,7 +12,7 @@ const {
 router.get("/", isAuthenticated, async (req, res) => {
   try {
     const user= await User.findById(req.tokenPayload.userId)
-    console.log(user)
+    console.log("tokenPayload: ",req.tokenPayload)
     if(user.isTeacher){
       console.log("A teacher")
        const allCourses = await Course.find({ teacher: req.tokenPayload.userId });
@@ -40,7 +40,7 @@ router.get("/", isAuthenticated, async (req, res) => {
 
 router.get("/current-courses", isAuthenticated, async (req, res) => {
   try {
-    const allCourses = await Course.find({ teacher: req.tokenPayload.userId });
+    const allCourses = await Course.find({  });
 
     if (!allCourses.length) {
       console.log("There is no course for this teacher");
@@ -68,12 +68,22 @@ router.post("/", isAuthenticated, isTeacher, async (req, res) => {
   newCoursePayload.teacher = req.tokenPayload.userId;
 
   try {
+    
+    const user= await User.findById(req.tokenPayload.userId)
     const newCourse = await Course.create(newCoursePayload);
+    user.courseId.push(newCourse._id) 
+    await user.save();
+    
     res.status(201).json(newCourse);
   } catch (error) {
     console.log(error);
     res.status(500).json(error);
   }
 });
+
+// Update a course
+router.put("/:courseId", async(req,res)=>{
+
+})
 
 module.exports = router;
