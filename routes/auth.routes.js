@@ -23,20 +23,20 @@ router.post("/signup", async (req, res) => {
     courseId,
     isTeacher,
   } = req.body;
-  console.log(req.body);
+
   // Basic validation for empty fields
   if (!email || !password || !firstName || !lastName) {
     return res
       .status(400)
       .json({ message: "Provide email, password, and name" });
   }
-  console.log("data validated");
+
   // Email format validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   if (!emailRegex.test(email)) {
     return res.status(400).json({ message: "Provide a valid email address." });
   }
-  console.log("email validated");
+
   // Password complexity validation
   const passwordRegex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/;
   if (!passwordRegex.test(password)) {
@@ -45,25 +45,18 @@ router.post("/signup", async (req, res) => {
         "Password must have at least 6 characters and include at least one number, one lowercase and one uppercase letter.",
     });
   }
-  console.log("pass validated");
+
   // Check for duplicate email
   try {
     const foundUser = await User.findOne({ email });
     if (foundUser) {
       return res.status(400).json({ message: "User already exists." });
     }
-    console.log("user found");
+
     // Hash password and create user if email is not found
     const salt = bcrypt.genSaltSync(13);
     const passwordHash = bcrypt.hashSync(password, salt);
-    console.log(email);
-    console.log(passwordHash);
-    console.log(firstName);
-    console.log(lastName);
-    console.log(profilePictureUrl);
-    console.log(phoneNumber);
-    console.log(courseId);
-    console.log(isTeacher);
+
     const newUser = await User.create({
       email,
       passwordHash,
