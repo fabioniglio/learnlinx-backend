@@ -172,8 +172,8 @@ router.delete("/:courseId", isAuthenticated, isTeacher, async (req, res) => {
         .json({ message: "You don't have permission to delete this course." });
     }
   } catch (error) {
-    console.error("Error while deleting student ->", error);
-    res.status(500).json({ message: "Error while deleting a single student" });
+    console.error("Error while deleting course ->", error);
+    res.status(500).json({ message: "Error while deleting a single course" });
   }
 });
 
