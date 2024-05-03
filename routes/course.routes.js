@@ -113,7 +113,7 @@ router.get("/:courseId", async (req, res) => {
   }
 });
 
-// POST one course
+// POST one course - create a new course
 router.post("/", isAuthenticated, isTeacher, async (req, res) => {
   const newCoursePayload = req.body;
   newCoursePayload.teacher = req.tokenPayload.userId;
@@ -132,13 +132,25 @@ router.post("/", isAuthenticated, isTeacher, async (req, res) => {
 });
 
 //PUT /api/courses/:courseId - Updates a specific course by id
-router.put("/:courseId",isAuthenticated, isTeacher, async (req, res) => {
+router.put("/:courseId", isAuthenticated, isTeacher, async (req, res) => {
   try {
-    const updatedCourse = await Course.findByIdAndUpdate(
-      req.params.courseId,
-      req.body
-    );
-    res.status(200).json(updatedCourse);
+    const user = await User.findOne({ courseId: req.params.courseId });
+    if (user._id.toHexString() === req.tokenPayload.userId) {
+      const updatedCourse = await Course.findByIdAndUpdate(
+        req.params.courseId,
+        req.body,
+        {
+          new: true,
+        }
+      );
+      console.log(" updatedCourse: ", updatedCourse);
+      res.status(200).json(updatedCourse);
+    } else {
+      console.log("You don't have permission to update this course.");
+      res
+        .status(500)
+        .json({ message: "You don't have permission to update this course." });
+    }
   } catch (error) {
     console.error("Error while updating course ->", error);
     res.status(500).json({ message: "Error while updating a single course" });
@@ -148,9 +160,17 @@ router.put("/:courseId",isAuthenticated, isTeacher, async (req, res) => {
 //DELETE /api/courses/:courseId - Delete a specific course by id
 router.delete("/:courseId", isAuthenticated, isTeacher, async (req, res) => {
   try {
-    await Course.findByIdAndDelete(req.params.courseId);
+    const user = await User.findOne({ courseId: req.params.courseId });
+    if (user._id.toHexString() === req.tokenPayload.userId) {
+      await Course.findByIdAndDelete(req.params.courseId);
 
-    res.status(204).send();
+      res.status(204).send();
+    } else {
+      console.log("You don't have permission to delete this course.");
+      res
+        .status(500)
+        .json({ message: "You don't have permission to delete this course." });
+    }
   } catch (error) {
     console.error("Error while deleting student ->", error);
     res.status(500).json({ message: "Error while deleting a single student" });
@@ -158,4 +178,3 @@ router.delete("/:courseId", isAuthenticated, isTeacher, async (req, res) => {
 });
 
 module.exports = router;
-
