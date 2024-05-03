@@ -1,35 +1,40 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const courseSchema = new mongoose.Schema({
   courseName: {
     type: String,
-    required: true
+    required: true,
   },
-  studentList: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User"
-  }],
+  coursePictureUrl: {
+    type: String,
+  },
+  studentList: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
   startDate: {
     type: Date,
-    required: true
+    required: true,
   },
   endDate: {
     type: Date,
-    required: true
+    required: true,
   },
   description: {
     type: String,
-    required: true
+    required: true,
   },
   zoomLink: {
-    type: String
+    type: String,
   },
-  teacher:{
+  teacher: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User"
-  }
+    ref: "User",
+  },
 });
 
-const Course = mongoose.model('Course', courseSchema);
+const Course = mongoose.model("Course", courseSchema);
 
 module.exports = Course;
