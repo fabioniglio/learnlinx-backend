@@ -10,43 +10,43 @@ const {
 // /api/users
 
 // GET all users of this teacher
-router.get("/", (req, res) => {
-  res.json("All good in user");
+
+//GET /api/users/students/:courseId - get all students  of specific course
+router.get("/students/:courseId", isAuthenticated, isTeacher, async (req, res) => {
+  try {
+  
+    
+    const course = await Course.findById(req.params.courseId).populate("studentList");
+
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    const students = course.studentList;
+
+    res.status(200).json(students);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+
 });
 
-// GET all users
-// router.get("/", isAuthenticated,isTeacher, async (req, res) => {
-//   try {
-//     const user = await User.findById(req.tokenPayload.userId);
-
-//     if (user.isTeacher) {
-//       const allCourses = await User.find({
-//         teacher: req.tokenPayload.userId,
-//       });
-
-//       if (!allCourses.length) {
-//         console.log("There is no course to show");
-//       }
-//       res.status(200).json(allCourses);
-//     } else {
-//       const allCourses = await Course.find({
-//         studentList: req.tokenPayload.userId,
-//       });
-//       if (!allCourses.length) {
-//         console.log("There is no course to show");
-//       }
-//       res.status(200).json(allCourses);
-//     }
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).json(error);
-//   }
-// });
-
-// GET  /api/users/:userId  - show detailes of one user
+// GET  /api/users/:userId  - get detailes of one user
 router.get("/:userId", isAuthenticated, async (req, res) => {
   try {
     const user = await User.findById(req.params.userId);
+    res.status(200).json(user);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+});
+
+// GET  /api/users  - get detailes of the user that is already logged in 
+router.get("/", isAuthenticated, async (req, res) => {
+  try {
+    const user = await User.findById(req.tokenPayload.userId);
     res.status(200).json(user);
   } catch (error) {
     console.log(error);
