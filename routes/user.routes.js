@@ -8,39 +8,6 @@ const {
 
 // /api/users
 
-// GET all users of this teacher
-router.get("/", (req, res) => {
-  res.json("All good in user");
-});
-
-// GET all users
-// router.get("/", isAuthenticated,isTeacher, async (req, res) => {
-//   try {
-//     const user = await User.findById(req.tokenPayload.userId);
-
-//     if (user.isTeacher) {
-//       const allCourses = await User.find({
-//         teacher: req.tokenPayload.userId,
-//       });
-
-//       if (!allCourses.length) {
-//         console.log("There is no course to show");
-//       }
-//       res.status(200).json(allCourses);
-//     } else {
-//       const allCourses = await Course.find({
-//         studentList: req.tokenPayload.userId,
-//       });
-//       if (!allCourses.length) {
-//         console.log("There is no course to show");
-//       }
-//       res.status(200).json(allCourses);
-//     }
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).json(error);
-//   }
-// });
 
 // GET  /api/users/:userId  - show detailes of one user
 router.get("/:userId", isAuthenticated, async (req, res) => {
@@ -82,3 +49,6 @@ router.delete("/:userId", isAuthenticated, async (req, res) => {
 });
 
 module.exports = router;
+
+
+
