@@ -12,29 +12,34 @@ const {
 // GET all users of this teacher
 
 //GET /api/users/students/:courseId - get all students  of specific course
-router.get("/students/:courseId", isAuthenticated, isTeacher, async (req, res) => {
-  try {
-  
-    
-    const course = await Course.findById(req.params.courseId).populate("studentList");
+router.get(
+  "/students/:courseId",
+  isAuthenticated,
+  isTeacher,
+  async (req, res) => {
+    try {
+      const course = await Course.findById(req.params.courseId).populate(
+        "studentList"
+      );
 
-    if (!course) {
-      return res.status(404).json({ message: "Course not found" });
+      if (!course) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+
+      const students = course.studentList;
+
+      res.status(200).json(students);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal Server Error" });
     }
-
-    const students = course.studentList;
-
-    res.status(200).json(students);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server Error" });
   }
-
-});
+);
 
 // GET  /api/users/:userId  - get detailes of one user
 router.get("/:userId", isAuthenticated, async (req, res) => {
   try {
+    console.log("-----------------------", req.params.userId);
     const user = await User.findById(req.params.userId);
     res.status(200).json(user);
   } catch (error) {
@@ -43,7 +48,7 @@ router.get("/:userId", isAuthenticated, async (req, res) => {
   }
 });
 
-// GET  /api/users  - get detailes of the user that is already logged in 
+// GET  /api/users  - get detailes of the user that is already logged in
 router.get("/", isAuthenticated, async (req, res) => {
   try {
     const user = await User.findById(req.tokenPayload.userId);
@@ -53,6 +58,41 @@ router.get("/", isAuthenticated, async (req, res) => {
     res.status(500).json(error);
   }
 });
+
+// GET  /api/users  - get all student of this teacher (not finished yet)
+router.get(
+  "/teacher/students",
+  isAuthenticated,
+  isTeacher,
+  async (req, res) => {
+    try {
+      const teacherId = req.tokenPayload.userId;
+
+      // Find all courses taught by the teacher
+      const courses = await Course.find({ teacher: teacherId });
+
+      // Initialize a Set to store unique student IDs
+      const studentIdsSet = new Set();
+      const studentsSet = [];
+
+      // Collect unique student IDs from all courses
+      for (const course of courses) {
+        for (const studentId of course.studentList) {
+          if (!studentIdsSet.has(studentId.toString())) {
+            studentIdsSet.add(studentId.toString());
+            const student = await User.findById(studentId); 
+            studentsSet.push(student);
+          }
+        }
+      }
+
+      res.status(200).json(studentsSet);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  }
+);
 
 //PUT /api/users/:userId - Update a specific user by id
 router.put("/:userId", isAuthenticated, async (req, res) => {
@@ -82,7 +122,7 @@ router.delete("/:userId", isAuthenticated, async (req, res) => {
   }
 });
 
-// POST "/api/upload" => Route that receives the image, sends it to Cloudinary via the fileUploader and returns the image URL
+// POST "/api/users/upload" => Route that receives the image, sends it to Cloudinary via the fileUploader and returns the image URL
 router.post("/upload", fileUploader.single("imageUrl"), (req, res, next) => {
   // console.log("file is: ", req.file)
 
