@@ -14,7 +14,6 @@ router.get("/", isAuthenticated, async (req, res) => {
     const user = await User.findById(req.tokenPayload.userId);
     console.log("tokenPayload: ", req.tokenPayload);
     if (user.isTeacher) {
-      console.log("A teacher");
       const allCourses = await Course.find({
         teacher: req.tokenPayload.userId,
       });
@@ -72,7 +71,7 @@ router.get("/current-courses", isAuthenticated, async (req, res) => {
 });
 
 //Get the upcomming courses
-router.get("/current-courses", isAuthenticated, async (req, res) => {
+router.get("/upcomming-courses", isAuthenticated, async (req, res) => {
   let allCourses;
   const currentDate = new Date();
   console.log("currentDate:", currentDate);

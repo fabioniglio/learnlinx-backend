@@ -102,8 +102,6 @@ router.post("/login", async (req, res) => {
           }
         );
 
-        // res.status(200).json({ token: authToken });
-
         res.status(200).json({
           message: `Welcome back ${potentialUser.firstName}`,
           token: authToken,

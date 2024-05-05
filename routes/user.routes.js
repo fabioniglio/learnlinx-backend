@@ -27,7 +27,7 @@ router.get(
       }
 
       const students = course.studentList;
-
+      
       res.status(200).json(students);
     } catch (error) {
       console.error(error);
@@ -39,7 +39,6 @@ router.get(
 // GET  /api/users/:userId  - get detailes of one user
 router.get("/:userId", isAuthenticated, async (req, res) => {
   try {
-    console.log("-----------------------", req.params.userId);
     const user = await User.findById(req.params.userId);
     res.status(200).json(user);
   } catch (error) {
@@ -59,7 +58,7 @@ router.get("/", isAuthenticated, async (req, res) => {
   }
 });
 
-// GET  /api/users  - get all student of this teacher (not finished yet)
+// GET  /api/users/teacher/students  - get all student of this teacher 
 router.get(
   "/teacher/students",
   isAuthenticated,
