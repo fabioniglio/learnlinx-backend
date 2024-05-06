@@ -80,7 +80,7 @@ router.get(
         for (const studentId of course.studentList) {
           if (!studentIdsSet.has(studentId.toString())) {
             studentIdsSet.add(studentId.toString());
-            const student = await User.findById(studentId); 
+            const student = await User.findById(studentId);
             studentsSet.push(student);
           }
         }
