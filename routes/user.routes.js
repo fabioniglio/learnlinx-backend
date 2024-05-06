@@ -27,7 +27,7 @@ router.get(
       }
 
       const students = course.studentList;
-      
+
       res.status(200).json(students);
     } catch (error) {
       console.error(error);
@@ -58,7 +58,7 @@ router.get("/", isAuthenticated, async (req, res) => {
   }
 });
 
-// GET  /api/users/teacher/students  - get all student of this teacher 
+// GET  /api/users/teacher/students  - get all student of this teacher
 router.get(
   "/teacher/students",
   isAuthenticated,
@@ -94,21 +94,30 @@ router.get(
 );
 
 //PUT /api/users/:userId - Update a specific user by id
-router.put("/:userId", isAuthenticated, async (req, res) => {
-  try {
-    const updatedUser = await User.findByIdAndUpdate(
-      req.params.userId,
-      req.body,
-      {
-        new: true,
+router.put(
+  "/:userId",
+  isAuthenticated,
+  fileUploader.single("imageUrl"),
+  async (req, res) => {
+    try {
+      if (req.file) {
+        req.body.profilePictureUrl = req.file.path;
       }
-    );
-    res.status(200).json(updatedUser);
-  } catch (error) {
-    console.error("Error while updating user ->", error);
-    res.status(500).json({ message: "Error while updating a single user" });
+
+      const updatedUser = await User.findByIdAndUpdate(
+        req.params.userId,
+        req.body,
+        {
+          new: true,
+        }
+      );
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      console.error("Error while updating user ->", error);
+      res.status(500).json({ message: "Error while updating a single user" });
+    }
   }
-});
+);
 
 //DELETE /api/users/:userId - Delete a specific user by id
 router.delete("/:userId", isAuthenticated, async (req, res) => {
