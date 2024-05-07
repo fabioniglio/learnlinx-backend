@@ -9,35 +9,6 @@ const fileUploader = require("../config/cloudinary.config");
 
 // /api/courses
 
-// // GET all courses
-// router.get("/", isAuthenticated, async (req, res) => {
-//   try {
-//     const user = await User.findById(req.tokenPayload.userId);
-//     console.log("tokenPayload: ", req.tokenPayload);
-//     if (user.isTeacher) {
-//       const allCourses = await Course.find({
-//         teacher: req.tokenPayload.userId,
-//       });
-
-//       if (!allCourses.length) {
-//         console.log("There is no course to show");
-//       }
-//       res.status(200).json(allCourses);
-//     } else {
-//       const allCourses = await Course.find({
-//         studentList: req.tokenPayload.userId,
-//       });
-//       if (!allCourses.length) {
-//         console.log("There is no course to show");
-//       }
-//       res.status(200).json(allCourses);
-//     }
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).json(error);
-//   }
-// });
-
 // GET all courses
 router.get("/", isAuthenticated, async (req, res) => {
   try {
@@ -46,7 +17,7 @@ router.get("/", isAuthenticated, async (req, res) => {
     if (user.isTeacher) {
       const allCourses = await Course.find({
         teacher: req.tokenPayload.userId,
-      }).populate("studentList"); // Populate the studentList field with user objects
+      }).populate("studentList").populate("teacher"); 
 
       if (!allCourses.length) {
         console.log("There is no course to show");
@@ -55,7 +26,7 @@ router.get("/", isAuthenticated, async (req, res) => {
     } else {
       const allCourses = await Course.find({
         studentList: req.tokenPayload.userId,
-      }).populate("studentList"); // Populate the studentList field with user objects
+      }).populate("studentList").populate("teacher"); 
 
       if (!allCourses.length) {
         console.log("There is no course to show");
@@ -83,13 +54,13 @@ router.get("/current-courses", isAuthenticated, async (req, res) => {
         teacher: user._id,
         endDate: { $gte: currentDate },
         startDate: { $lte: currentDate },
-      }).populate("studentList");
+      }).populate("studentList").populate("teacher");
     } else {
       allCourses = await Course.find({
         studentList: req.tokenPayload.userId,
         endDate: { $gte: currentDate },
         startDate: { $lte: currentDate },
-      }).populate("studentList");
+      }).populate("studentList").populate("teacher");
     }
     if (!allCourses.length) {
       console.log("There are no current courses for this user");
@@ -121,7 +92,7 @@ router.get("/upcoming-courses", isAuthenticated, async (req, res) => {
       allCourses = await Course.find({
         studentList: req.tokenPayload.userId,
         startDate: { $gt: currentDate },
-      }).populate("studentList");
+      }).populate("studentList").populate("teacher");
     }
     if (!allCourses.length) {
       console.log("There are no current courses for this user");
