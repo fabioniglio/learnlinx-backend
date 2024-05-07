@@ -76,24 +76,36 @@ router.get("/current-courses", isAuthenticated, async (req, res) => {
 router.get("/upcoming-courses", isAuthenticated, async (req, res) => {
   let allCourses;
   const currentDate = new Date();
-  console.log("currentDate:", currentDate);
-  try {
-    const user = await User.findById(req.tokenPayload.userId);
+  // try {
+  //   const user = await User.findById(req.tokenPayload.userId);
 
-    console.log(user);
+  //   console.log(user);
 
-    if (user.isTeacher) {
-      console.log(user);
+  //   if (user.isTeacher) {
+  //     console.log(user);
+  //     allCourses = await Course.find({
+  //       teacher: user._id,
+  //       startDate: { $gt: currentDate },
+  //     });
+  //   } else {
+  //     allCourses = await Course.find({
+  //       studentList: req.tokenPayload.userId,
+  //       startDate: { $gt: currentDate },
+  //     }).populate("studentList").populate("teacher");
+  //   }
+  //   if (!allCourses.length) {
+  //     console.log("There are no current courses for this user");
+  //   }
+  //   res.status(200).json(allCourses);
+  // } catch (error) {
+  //   console.log(error);
+  //   res.status(500).json(error);
+  // }
+  try {  
       allCourses = await Course.find({
-        teacher: user._id,
         startDate: { $gt: currentDate },
       });
-    } else {
-      allCourses = await Course.find({
-        studentList: req.tokenPayload.userId,
-        startDate: { $gt: currentDate },
-      }).populate("studentList").populate("teacher");
-    }
+    
     if (!allCourses.length) {
       console.log("There are no current courses for this user");
     }
