@@ -5,6 +5,7 @@ const {
   isAuthenticated,
   isTeacher,
 } = require("../middlewares/route-guard.middleware");
+const fileUploader = require("../config/cloudinary.config");
 
 // /api/courses
 
@@ -146,7 +147,10 @@ router.get("/:courseId", async (req, res) => {
 });
 
 // POST one course - create a new course
-router.post("/", isAuthenticated, isTeacher, async (req, res) => {
+router.post("/", isAuthenticated, isTeacher,  fileUploader.single("imageUrl"),  async (req, res) => {
+  if (req.file) {
+    req.body.profilePictureUrl = req.file.path;
+  }
   const newCoursePayload = req.body;
   newCoursePayload.teacher = req.tokenPayload.userId;
 
@@ -164,8 +168,11 @@ router.post("/", isAuthenticated, isTeacher, async (req, res) => {
 });
 
 //PUT /api/courses/:courseId - Updates a specific course by id
-router.put("/:courseId", isAuthenticated, isTeacher, async (req, res) => {
+router.put("/:courseId", isAuthenticated, isTeacher,  fileUploader.single("imageUrl"),async (req, res) => {
   try {
+    if (req.file) {
+      req.body.profilePictureUrl = req.file.path;
+    }
     const user = await User.findOne({ courseId: req.params.courseId });
     if (user._id.toHexString() === req.tokenPayload.userId) {
       const updatedCourse = await Course.findByIdAndUpdate(
