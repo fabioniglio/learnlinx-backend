@@ -11,4 +11,7 @@ router.use("/courses",courseRoutes)
 const userRoutes = require("./user.routes")
 router.use("/users",userRoutes)
 
+const eventRoutes = require("./event.routes")
+router.use("/events",eventRoutes)
+
 module.exports = router
