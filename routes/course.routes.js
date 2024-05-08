@@ -188,11 +188,9 @@ router.put(
         res.status(200).json(updatedCourse);
       } else {
         console.log("You don't have permission to update this course.");
-        res
-          .status(500)
-          .json({
-            message: "You don't have permission to update this course.",
-          });
+        res.status(500).json({
+          message: "You don't have permission to update this course.",
+        });
       }
     } catch (error) {
       console.error("Error while updating course ->", error);
