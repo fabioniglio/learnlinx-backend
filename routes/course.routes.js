@@ -9,35 +9,6 @@ const fileUploader = require("../config/cloudinary.config");
 
 // /api/courses
 
-// // GET all courses
-// router.get("/", isAuthenticated, async (req, res) => {
-//   try {
-//     const user = await User.findById(req.tokenPayload.userId);
-//     console.log("tokenPayload: ", req.tokenPayload);
-//     if (user.isTeacher) {
-//       const allCourses = await Course.find({
-//         teacher: req.tokenPayload.userId,
-//       });
-
-//       if (!allCourses.length) {
-//         console.log("There is no course to show");
-//       }
-//       res.status(200).json(allCourses);
-//     } else {
-//       const allCourses = await Course.find({
-//         studentList: req.tokenPayload.userId,
-//       });
-//       if (!allCourses.length) {
-//         console.log("There is no course to show");
-//       }
-//       res.status(200).json(allCourses);
-//     }
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).json(error);
-//   }
-// });
-
 // GET all courses
 router.get("/", isAuthenticated, async (req, res) => {
   try {
@@ -46,7 +17,9 @@ router.get("/", isAuthenticated, async (req, res) => {
     if (user.isTeacher) {
       const allCourses = await Course.find({
         teacher: req.tokenPayload.userId,
-      }).populate("studentList"); // Populate the studentList field with user objects
+      })
+        .populate("studentList")
+        .populate("teacher");
 
       if (!allCourses.length) {
         console.log("There is no course to show");
@@ -55,7 +28,9 @@ router.get("/", isAuthenticated, async (req, res) => {
     } else {
       const allCourses = await Course.find({
         studentList: req.tokenPayload.userId,
-      }).populate("studentList"); // Populate the studentList field with user objects
+      })
+        .populate("studentList")
+        .populate("teacher");
 
       if (!allCourses.length) {
         console.log("There is no course to show");
@@ -83,13 +58,17 @@ router.get("/current-courses", isAuthenticated, async (req, res) => {
         teacher: user._id,
         endDate: { $gte: currentDate },
         startDate: { $lte: currentDate },
-      }).populate("studentList");
+      })
+        .populate("studentList")
+        .populate("teacher");
     } else {
       allCourses = await Course.find({
         studentList: req.tokenPayload.userId,
         endDate: { $gte: currentDate },
         startDate: { $lte: currentDate },
-      }).populate("studentList");
+      })
+        .populate("studentList")
+        .populate("teacher");
     }
     if (!allCourses.length) {
       console.log("There are no current courses for this user");
@@ -105,24 +84,36 @@ router.get("/current-courses", isAuthenticated, async (req, res) => {
 router.get("/upcoming-courses", isAuthenticated, async (req, res) => {
   let allCourses;
   const currentDate = new Date();
-  console.log("currentDate:", currentDate);
+  // try {
+  //   const user = await User.findById(req.tokenPayload.userId);
+
+  //   console.log(user);
+
+  //   if (user.isTeacher) {
+  //     console.log(user);
+  //     allCourses = await Course.find({
+  //       teacher: user._id,
+  //       startDate: { $gt: currentDate },
+  //     });
+  //   } else {
+  //     allCourses = await Course.find({
+  //       studentList: req.tokenPayload.userId,
+  //       startDate: { $gt: currentDate },
+  //     }).populate("studentList").populate("teacher");
+  //   }
+  //   if (!allCourses.length) {
+  //     console.log("There are no current courses for this user");
+  //   }
+  //   res.status(200).json(allCourses);
+  // } catch (error) {
+  //   console.log(error);
+  //   res.status(500).json(error);
+  // }
   try {
-    const user = await User.findById(req.tokenPayload.userId);
+    allCourses = await Course.find({
+      startDate: { $gt: currentDate },
+    });
 
-    console.log(user);
-
-    if (user.isTeacher) {
-      console.log(user);
-      allCourses = await Course.find({
-        teacher: user._id,
-        startDate: { $gt: currentDate },
-      });
-    } else {
-      allCourses = await Course.find({
-        studentList: req.tokenPayload.userId,
-        startDate: { $gt: currentDate },
-      }).populate("studentList");
-    }
     if (!allCourses.length) {
       console.log("There are no current courses for this user");
     }
@@ -136,9 +127,9 @@ router.get("/upcoming-courses", isAuthenticated, async (req, res) => {
 // GET one course
 router.get("/:courseId", async (req, res) => {
   try {
-    const course = await Course.findById(req.params.courseId).populate(
-      "studentList"
-    );
+    const course = await Course.findById(req.params.courseId)
+      .populate("studentList")
+      .populate("teacher");
     res.status(200).json(course);
   } catch (error) {
     console.log(error);
@@ -147,54 +138,66 @@ router.get("/:courseId", async (req, res) => {
 });
 
 // POST one course - create a new course
-router.post("/", isAuthenticated, isTeacher,  fileUploader.single("imageUrl"),  async (req, res) => {
-  if (req.file) {
-    req.body.profilePictureUrl = req.file.path;
-  }
-  const newCoursePayload = req.body;
-  newCoursePayload.teacher = req.tokenPayload.userId;
-
-  try {
-    const user = await User.findById(req.tokenPayload.userId);
-    const newCourse = await Course.create(newCoursePayload);
-    user.courseId.push(newCourse._id);
-    await user.save();
-
-    res.status(201).json(newCourse);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json(error);
-  }
-});
-
-//PUT /api/courses/:courseId - Updates a specific course by id
-router.put("/:courseId", isAuthenticated, isTeacher,  fileUploader.single("imageUrl"),async (req, res) => {
-  try {
+router.post(
+  "/",
+  isAuthenticated,
+  isTeacher,
+  fileUploader.single("imageUrl"),
+  async (req, res) => {
     if (req.file) {
       req.body.profilePictureUrl = req.file.path;
     }
-    const user = await User.findOne({ courseId: req.params.courseId });
-    if (user._id.toHexString() === req.tokenPayload.userId) {
-      const updatedCourse = await Course.findByIdAndUpdate(
-        req.params.courseId,
-        req.body,
-        {
-          new: true,
-        }
-      );
-      console.log(" updatedCourse: ", updatedCourse);
-      res.status(200).json(updatedCourse);
-    } else {
-      console.log("You don't have permission to update this course.");
-      res
-        .status(500)
-        .json({ message: "You don't have permission to update this course." });
+    const newCoursePayload = req.body;
+    newCoursePayload.teacher = req.tokenPayload.userId;
+
+    try {
+      const user = await User.findById(req.tokenPayload.userId);
+      const newCourse = await Course.create(newCoursePayload);
+      user.courseId.push(newCourse._id);
+      await user.save();
+
+      res.status(201).json(newCourse);
+    } catch (error) {
+      console.log(error);
+      res.status(500).json(error);
     }
-  } catch (error) {
-    console.error("Error while updating course ->", error);
-    res.status(500).json({ message: "Error while updating a single course" });
   }
-});
+);
+
+//PUT /api/courses/:courseId - Updates a specific course by id
+router.put(
+  "/:courseId",
+  isAuthenticated,
+  isTeacher,
+  fileUploader.single("imageUrl"),
+  async (req, res) => {
+    try {
+      if (req.file) {
+        req.body.profilePictureUrl = req.file.path;
+      }
+      const user = await User.findOne({ courseId: req.params.courseId });
+      if (user._id.toHexString() === req.tokenPayload.userId) {
+        const updatedCourse = await Course.findByIdAndUpdate(
+          req.params.courseId,
+          req.body,
+          {
+            new: true,
+          }
+        );
+        console.log(" updatedCourse: ", updatedCourse);
+        res.status(200).json(updatedCourse);
+      } else {
+        console.log("You don't have permission to update this course.");
+        res.status(500).json({
+          message: "You don't have permission to update this course.",
+        });
+      }
+    } catch (error) {
+      console.error("Error while updating course ->", error);
+      res.status(500).json({ message: "Error while updating a single course" });
+    }
+  }
+);
 
 //DELETE /api/courses/:courseId - Delete a specific course by id
 router.delete("/:courseId", isAuthenticated, isTeacher, async (req, res) => {

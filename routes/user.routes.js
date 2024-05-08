@@ -9,7 +9,25 @@ const {
 
 // /api/users
 
-// GET all users of this teacher
+// GET /api/users/all-users all users that have an account
+router.get(
+  "/all-users",
+  isAuthenticated,
+  isTeacher,
+  async (req, res) => {
+    try {
+      const allUsers= await User.find();
+      if(!allUsers){
+        return res.status(404).json({ message: "No user exist!" });
+      }
+      res.status(200).json(allUsers);
+ 
+      }catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error" });
+      }
+    }
+  )
 
 //GET /api/users/students/:courseId - get all students  of specific course
 router.get(
