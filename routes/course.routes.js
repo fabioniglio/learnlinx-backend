@@ -175,8 +175,9 @@ router.put(
       if (req.file) {
         req.body.profilePictureUrl = req.file.path;
       }
-      const user = await User.findOne({ courseId: req.params.courseId });
-      if (user._id.toHexString() === req.tokenPayload.userId) {
+      const course = await Course.findById(req.params.courseId);
+
+      if (course.teacher.toHexString() === req.tokenPayload.userId) {
         const updatedCourse = await Course.findByIdAndUpdate(
           req.params.courseId,
           req.body,
