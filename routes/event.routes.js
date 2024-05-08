@@ -1,15 +1,36 @@
 const Event = require("../models/Event.model"); // Assuming Event model is in the same directory as Course model
+const User = require("../models/User.model"); // Assuming Event model is in the same directory as Course model
+const Course = require("../models/Course.model"); // Assuming Event model is in the same directory as Course model
 const router = require("express").Router();
 const {
   isAuthenticated,
   isTeacher,
 } = require("../middlewares/route-guard.middleware");
-const fileUploader = require("../config/cloudinary.config");
 
-// GET all events
+// GET all events of a given course
+router.get("/:courseId", isAuthenticated, async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const allEvents = await Event.find({ courseId: courseId });
+    res.status(200).json(allEvents);
+  } catch (error) {
+    console.error("Error retrieving events for the course:", error);
+    res.status(500).json(error);
+  }
+});
+
+// GET all events for a given user
 router.get("/", isAuthenticated, async (req, res) => {
   try {
-    const allEvents = await Event.find();
+    const user = await User.findById(req.tokenPayload.userId);
+    console.log(user);
+    
+    const courseIds = user.courseId.map(course => course._id);
+    console.log("********courseIds",courseIds )
+
+    const allEvents = await Event.find({courseId: { $in: courseIds }});
+    console.log("********allEvents",allEvents )
+    
     res.status(200).json(allEvents);
   } catch (error) {
     console.error("Error retrieving events:", error);
@@ -17,7 +38,7 @@ router.get("/", isAuthenticated, async (req, res) => {
   }
 });
 
-// GET events by date
+// GET all events in a course by date
 router.get("/events/:date", isAuthenticated, async (req, res) => {
   const { date } = req.params;
   try {
@@ -29,7 +50,7 @@ router.get("/events/:date", isAuthenticated, async (req, res) => {
   }
 });
 
-// GET one event by ID
+// GET one event in a course by ID
 router.get("/:eventId", isAuthenticated, async (req, res) => {
   try {
     const event = await Event.findById(req.params.eventId);
@@ -40,8 +61,8 @@ router.get("/:eventId", isAuthenticated, async (req, res) => {
   }
 });
 
-// POST one event - create a new event
-router.post("/", isAuthenticated, isTeacher, async (req, res) => {
+// POST one event - create a new event in a course
+router.post("/", isAuthenticated, async (req, res) => {
   const newEventPayload = req.body;
   try {
     const newEvent = await Event.create(newEventPayload);
@@ -52,7 +73,7 @@ router.post("/", isAuthenticated, isTeacher, async (req, res) => {
   }
 });
 
-// PUT - Update an existing event
+// PUT - Update an existing event in a course
 router.put("/:eventId", isAuthenticated, isTeacher, async (req, res) => {
   const { eventId } = req.params;
   try {
@@ -64,7 +85,7 @@ router.put("/:eventId", isAuthenticated, isTeacher, async (req, res) => {
   }
 });
 
-// DELETE an event
+// DELETE an event in a course
 router.delete("/:eventId", isAuthenticated, isTeacher, async (req, res) => {
   const { eventId } = req.params;
   try {
