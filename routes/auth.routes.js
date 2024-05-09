@@ -81,8 +81,6 @@ router.post("/signup", async (req, res) => {
 //POST to login
 router.post("/login", async (req, res) => {
   //Get back the credentials from the body
-  console.log("potential user: ", req.body);
-
   //Check if we have a user with this username
   try {
     const potentialUser = await User.findOne({ email: req.body.email });
@@ -101,10 +99,11 @@ router.post("/login", async (req, res) => {
             expiresIn: "6h",
           }
         );
-
+        console.log(potentialUser.isTeacher);
         res.status(200).json({
           message: `Welcome back ${potentialUser.firstName}`,
           token: authToken,
+          isTeacher: potentialUser.isTeacher,
         });
       } else {
         res.status(400).json({ message: "Incorrect password" });

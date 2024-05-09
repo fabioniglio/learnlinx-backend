@@ -13,7 +13,6 @@ const fileUploader = require("../config/cloudinary.config");
 router.get("/", isAuthenticated, async (req, res) => {
   try {
     const user = await User.findById(req.tokenPayload.userId);
-    console.log("tokenPayload: ", req.tokenPayload);
     if (user.isTeacher) {
       const allCourses = await Course.find({
         teacher: req.tokenPayload.userId,
@@ -47,13 +46,11 @@ router.get("/", isAuthenticated, async (req, res) => {
 router.get("/current-courses", isAuthenticated, async (req, res) => {
   let allCourses;
   const currentDate = new Date();
-  console.log("currentDate:", currentDate);
+
   try {
     const user = await User.findById(req.tokenPayload.userId);
-    console.log(user);
 
     if (user.isTeacher) {
-      console.log(user);
       allCourses = await Course.find({
         teacher: user._id,
         endDate: { $gte: currentDate },
@@ -175,7 +172,7 @@ router.put(
   async (req, res) => {
     try {
       if (req.file) {
-        req.body.profilePictureUrl = req.file.path;
+        req.body.coursePictureUrl = req.file.path;
       }
       const course = await Course.findById(req.params.courseId);
 
