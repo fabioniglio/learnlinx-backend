@@ -99,10 +99,11 @@ router.post("/login", async (req, res) => {
             expiresIn: "6h",
           }
         );
-
+        console.log(potentialUser.isTeacher);
         res.status(200).json({
           message: `Welcome back ${potentialUser.firstName}`,
           token: authToken,
+          isTeacher: potentialUser.isTeacher,
         });
       } else {
         res.status(400).json({ message: "Incorrect password" });
