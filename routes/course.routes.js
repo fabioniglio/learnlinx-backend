@@ -171,27 +171,55 @@ router.put(
   fileUploader.single("imageUrl"),
   async (req, res) => {
     try {
+      const { studentId } = req.body;
+      console.log(studentId);
       if (req.file) {
         req.body.coursePictureUrl = req.file.path;
       }
       const course = await Course.findById(req.params.courseId);
+      if (!course) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+      if (course.teacher.toHexString() !== req.tokenPayload.userId) {
+        return res.status(403).json({
+          message: "You do not have permission to update this course",
+        });
+      }
 
-      if (course.teacher.toHexString() === req.tokenPayload.userId) {
+      if (studentId) {
         const updatedCourse = await Course.findByIdAndUpdate(
           req.params.courseId,
-          req.body,
-          {
-            new: true,
-          }
-        );
+          { $addToSet: { studentList: studentId } }, // Use $addToSet to avoid duplicate entries
+          { new: true }
+        ).populate("studentList"); // Optionally populate the studentList to return detailed info
         console.log(" updatedCourse: ", updatedCourse);
         res.status(200).json(updatedCourse);
       } else {
-        console.log("You don't have permission to update this course.");
-        res.status(500).json({
-          message: "You don't have permission to update this course.",
-        });
+        // No studentId provided, just update other fields
+        const updatedCourse = await Course.findByIdAndUpdate(
+          req.params.courseId,
+          req.body,
+          { new: true }
+        );
+        res.status(200).json(updatedCourse);
       }
+
+      // if (course.teacher.toHexString() === req.tokenPayload.userId) {
+      //   const updatedCourse = await Course.findByIdAndUpdate(
+      //     req.params.courseId,
+      //     req.body,
+      //     {
+      //       new: true,
+      //     }
+      //   );
+      //   console.log(" updatedCourse: ", updatedCourse);
+      //   res.status(200).json(updatedCourse);
+      // } else {
+      //   console.log("You don't have permission to update this course.");
+      //   res.status(500).json({
+      //     message: "You don't have permission to update this course.",
+      //   });
+      // }
     } catch (error) {
       console.error("Error while updating course ->", error);
       res.status(500).json({ message: "Error while updating a single course" });
