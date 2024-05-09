@@ -112,7 +112,9 @@ router.get("/upcoming-courses", isAuthenticated, async (req, res) => {
   try {
     allCourses = await Course.find({
       startDate: { $gt: currentDate },
-    });
+    })
+      .populate("studentList")
+      .populate("teacher");
 
     if (!allCourses.length) {
       console.log("There are no current courses for this user");
