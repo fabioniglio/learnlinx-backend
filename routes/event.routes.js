@@ -59,8 +59,9 @@ router.get("/:eventId", isAuthenticated, async (req, res) => {
 });
 
 // POST one event - create a new event in a course
-router.post("/", isAuthenticated, async (req, res) => {
-  const newEventPayload = req.body;
+router.post("/:courseId", isAuthenticated, async (req, res) => {
+  const { courseId } = req.params;
+  const newEventPayload = { ...req.body, courseId };
   try {
     const newEvent = await Event.create(newEventPayload);
     res.status(201).json(newEvent);
