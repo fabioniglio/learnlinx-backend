@@ -118,8 +118,22 @@ router.post("/login", async (req, res) => {
 });
 
 //GET to verify
-router.get("/verify", isAuthenticated, (req, res) => {
-  res.json({ message: "Hello", data: req.tokenPayload });
+router.get("/verify", isAuthenticated, async (req, res) => {
+  try {
+    // Assuming req.tokenPayload.userId contains the user's ID
+    const user = await User.findById(req.tokenPayload.userId);
+    if (!user) throw new Error("User not found");
+
+    res.json({
+      message: "Verified user details",
+      userId: user._id,
+      email: user.email,
+      isTeacher: user.isTeacher,
+      data: req.tokenPayload,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 });
 
 module.exports = router;
