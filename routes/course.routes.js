@@ -170,7 +170,7 @@ router.put(
   async (req, res) => {
     try {
       if (req.file) {
-        req.body.profilePictureUrl = req.file.path;
+        req.body.coursePictureUrl = req.file.path;
       }
       const course = await Course.findById(req.params.courseId);
 
