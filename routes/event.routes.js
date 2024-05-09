@@ -24,13 +24,13 @@ router.get("/", isAuthenticated, async (req, res) => {
   try {
     const user = await User.findById(req.tokenPayload.userId);
     console.log(user);
-    
-    const courseIds = user.courseId.map(course => course._id);
-    console.log("********courseIds",courseIds )
 
-    const allEvents = await Event.find({courseId: { $in: courseIds }});
-    console.log("********allEvents",allEvents )
-    
+    const courseIds = user.courseId.map((course) => course._id);
+    console.log("********courseIds", courseIds);
+
+    const allEvents = await Event.find({ courseId: { $in: courseIds } });
+    console.log("********allEvents", allEvents);
+
     res.status(200).json(allEvents);
   } catch (error) {
     console.error("Error retrieving events:", error);
@@ -62,8 +62,9 @@ router.get("/:eventId", isAuthenticated, async (req, res) => {
 });
 
 // POST one event - create a new event in a course
-router.post("/", isAuthenticated, async (req, res) => {
-  const newEventPayload = req.body;
+router.post("/:courseId", isAuthenticated, async (req, res) => {
+  const { courseId } = req.params;
+  const newEventPayload = { ...req.body, courseId };
   try {
     const newEvent = await Event.create(newEventPayload);
     res.status(201).json(newEvent);
@@ -77,7 +78,9 @@ router.post("/", isAuthenticated, async (req, res) => {
 router.put("/:eventId", isAuthenticated, isTeacher, async (req, res) => {
   const { eventId } = req.params;
   try {
-    const updatedEvent = await Event.findByIdAndUpdate(eventId, req.body, { new: true });
+    const updatedEvent = await Event.findByIdAndUpdate(eventId, req.body, {
+      new: true,
+    });
     res.status(200).json(updatedEvent);
   } catch (error) {
     console.error("Error updating event:", error);
