@@ -23,13 +23,10 @@ router.get("/:courseId", isAuthenticated, async (req, res) => {
 router.get("/", isAuthenticated, async (req, res) => {
   try {
     const user = await User.findById(req.tokenPayload.userId);
-    console.log(user);
 
     const courseIds = user.courseId.map((course) => course._id);
-    console.log("********courseIds", courseIds);
 
     const allEvents = await Event.find({ courseId: { $in: courseIds } });
-    console.log("********allEvents", allEvents);
 
     res.status(200).json(allEvents);
   } catch (error) {
