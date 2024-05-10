@@ -191,6 +191,12 @@ router.put(
           { new: true }
         ).populate("studentList"); // Optionally populate the studentList to return detailed info
         console.log(" updatedCourse: ", updatedCourse);
+
+        await User.findByIdAndUpdate(
+          studentId,
+          { $addToSet: { courseId: req.params.courseId } },
+          { new: true }
+        ).populate("courseId");
         res.status(200).json(updatedCourse);
       } else {
         // No studentId provided, just update other fields
