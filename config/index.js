@@ -21,18 +21,27 @@ module.exports = (app) => {
   // Services like heroku use something called a proxy and you need to add this to your server
   app.set("trust proxy", 1);
 
-  // controls a very specific header to pass headers from the frontend
-  // app.use(
-  //   cors({
-  //     origin: [FRONTEND_URL],
-  //   })
-  // )
   app.use(
     cors({
-      origin: FRONTEND_URL,
+      origin: ["http://localhost:5173", process.env.ORIGIN],
       credentials: true, // Add this if you need to allow cookies or auth headers
     })
   );
+  // app.use((req, res, next) => {
+  //   res.header(
+  //     "Access-Control-Allow-Origin",
+  //     process.env.ORIGIN || "http://localhost:5173"
+  //   ); // Use env variable or fallback to localhost
+  //   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+  //   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+  //   // Handle preflight requests
+  //   if (req.method === "OPTIONS") {
+  //     res.sendStatus(200);
+  //   } else {
+  //     next();
+  //   }
+  // });
 
   // In development environment the app logs
   app.use(logger("dev"));
