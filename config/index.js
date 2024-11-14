@@ -24,7 +24,7 @@ module.exports = (app) => {
   app.use(
     cors({
       origin: ["http://localhost:5173", process.env.ORIGIN],
-      credentials: true, // Add this if you need to allow cookies or auth headers
+      credentials: true,
     })
   );
   // app.use((req, res, next) => {
