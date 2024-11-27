@@ -27,6 +27,13 @@ module.exports = (app) => {
   //     credentials: true,
   //   })
   // );
+
+  app.use(
+    cors({
+      origin: "*", // Allow all origins
+      credentials: true, // Enable cookies if needed
+    })
+  );
   // app.use((req, res, next) => {
   //   res.header("Access-Control-Allow-Origin", "*");
   //   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
