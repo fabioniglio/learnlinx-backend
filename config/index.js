@@ -17,33 +17,9 @@ const FRONTEND_URL = process.env.ORIGIN || "http://localhost:5173";
 
 // Middleware configuration
 module.exports = (app) => {
-  // Because this is a server that will accept requests from outside and it will be hosted ona server with a `proxy`, express needs to know that it should trust that setting.
-  // Services like heroku use something called a proxy and you need to add this to your server
   app.set("trust proxy", 1);
 
-  // app.use(
-  //   cors({
-  //     origin: ["http://localhost:5173", process.env.ORIGIN],
-  //     credentials: true,
-  //   })
-  // );
-
-  app.use(
-    cors({
-      origin: "*", // Allow all origins
-      credentials: true, // Enable cookies if needed
-    })
-  );
-  // app.use((req, res, next) => {
-  //   res.header("Access-Control-Allow-Origin", "*");
-  //   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-  //   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  //   if (req.method === "OPTIONS") {
-  //     res.sendStatus(200);
-  //   } else {
-  //     next();
-  //   }
-  // });
+  app.use(cors({ origin: FRONTEND_URL, credentials: true }));
 
   // In development environment the app logs
   app.use(logger("dev"));
