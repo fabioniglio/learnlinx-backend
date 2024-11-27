@@ -7,7 +7,11 @@ const PORT = process.env.PORT || 3000;
 // Connects to the database
 withDB(() => {
   // If connection was successful, start listening for requests
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server listening on http://0.0.0.0:${PORT}`);
-  });
+  app
+    .listen(PORT, "0.0.0.0", () => {
+      console.log(`Server listening on http://0.0.0.0:${PORT}`);
+    })
+    .on("error", (err) => {
+      console.error("Failed to start server:", err);
+    });
 });
